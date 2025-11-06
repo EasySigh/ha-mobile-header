@@ -1,0 +1,17 @@
+{
+  "name": "ha-navbar-position",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./ha-navbar-position.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=browser --outfile=ha-mobile-header.js",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "esbuild": "^0.25.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}
