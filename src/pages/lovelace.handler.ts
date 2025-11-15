@@ -5,7 +5,7 @@ import {
   lovelaceContainerOption,
   lovelaceHeaderOption, lovelaceMeatballsOption, lovelaceNavArrowsOption, lovelaceNavOption, lovelaceTabGroupOption,
   lovelaceTabsOption
-} from "../utils/elements.constants";
+} from "../utils/constants/element-options.constants";
 import {waitFor} from "../utils/observer";
 import {
   lovelaceBurgerStyle,
@@ -13,12 +13,19 @@ import {
   lovelaceHeaderStyle, lovelaceMeatballsStyle, lovelaceNavArrowsStyle,
   lovelaceNavStyle, lovelaceTabGroupStyles, lovelaceTabsStyle
 } from "../utils/styles/styles.constants";
-import {getElement, saveProcessed} from "../utils/helpers";
+import {getCachedElement, isStyled, markAsStyled, saveProcessed} from "../utils/helpers";
 
 export async function updateLovelace(pagePath: PagePath): Promise<void> {
   try {
     const elementStylesList = await getStyleList(pagePath);
-    if (!elementStylesList) return;
+    if (!elementStylesList?.length) return;
+
+    // If header was already styled, save page as processed and stop process.
+    const header = elementStylesList.find(el => el?.elementName === 'header')?.element;
+    if (header && isStyled(header)) {
+      saveProcessed();
+      return;
+    }
 
     applyStyles(elementStylesList);
     saveProcessed();
@@ -28,20 +35,7 @@ export async function updateLovelace(pagePath: PagePath): Promise<void> {
 }
 
 async function getStyleList(pagePath: PagePath): Promise<ElementStyleModel[]> {
-  const rootElement = document?.querySelector('home-assistant')?.shadowRoot?.querySelector('home-assistant-main')?.shadowRoot || document.body;
-
-  const container = await getElement(containerCache, rootElement, pagePath, lovelaceContainerOption);
-  if (!container) throw new Error("Could not find container.");
-
-  const header = await getElement(headerCache, container, pagePath, lovelaceHeaderOption);
-  if (!header) throw new Error("Could not find header");
-
-  const tabs = await waitFor(lovelaceTabsOption, container);
-  const nav = await waitFor(lovelaceNavOption, container);
-  const navContainer = await waitFor(lovelaceNavArrowsOption, container);
-  const tabGroup = await waitFor(lovelaceTabGroupOption, container);
-  const burger = await waitFor(lovelaceBurgerOption, container);
-  const meatballs = await waitFor(lovelaceMeatballsOption, container);
+  const { container, header, tabs, nav, navArrows, tabGroup, burger, meatballs } = await getElements(pagePath);
 
   return [
     {
@@ -50,33 +44,62 @@ async function getStyleList(pagePath: PagePath): Promise<ElementStyleModel[]> {
     },
     {
       element: header,
+      elementName: 'header',
       style: lovelaceHeaderStyle
     },
     {
       element: tabs,
-      style: lovelaceNavStyle
-    },
-    {
-      element: nav,
-      style: lovelaceBurgerStyle
-    },
-    {
-      element: navContainer,
-      style: lovelaceMeatballsStyle
-    },
-    {
-      element: tabGroup,
       style: lovelaceTabsStyle
     },
     {
-      element: burger,
+      element: nav,
+      style: lovelaceNavStyle
+    },
+    {
+      element: navArrows,
       style: lovelaceNavArrowsStyle
     },
     {
-      element: meatballs,
+      element: tabGroup,
       styles: lovelaceTabGroupStyles
+    },
+    {
+      element: burger,
+      style: lovelaceBurgerStyle
+    },
+    {
+      element: meatballs,
+      style: lovelaceMeatballsStyle
     }
   ];
+}
+
+async function getElements(pagePath: PagePath): Promise<{ [key: string]: Element | null }> {
+  const rootElement = document?.querySelector('home-assistant')?.shadowRoot?.querySelector('home-assistant-main')?.shadowRoot || document.body;
+
+  const container = await getCachedElement(containerCache, rootElement, pagePath, lovelaceContainerOption);
+  if (!container) throw new Error("Could not find container.");
+
+  const header = await getCachedElement(headerCache, rootElement, pagePath, lovelaceHeaderOption);
+  if (!header) throw new Error("Could not find header");
+
+  const tabs = await waitFor(lovelaceTabsOption, header, 0);
+  const nav = await waitFor(lovelaceNavOption, header, 0);
+  const navArrows = await waitFor(lovelaceNavArrowsOption, header, 0);
+  const tabGroup = await waitFor(lovelaceTabGroupOption, header, 0);
+  const burger = await waitFor(lovelaceBurgerOption, header, 0);
+  const meatballs = await waitFor(lovelaceMeatballsOption, header, 0);
+
+  return {
+    container,
+    header,
+    tabs,
+    nav,
+    navArrows,
+    tabGroup,
+    burger,
+    meatballs,
+  }
 }
 
 function applyStyles(elList: ElementStyleModel[]): void {
@@ -89,5 +112,7 @@ function applyStyles(elList: ElementStyleModel[]): void {
 
     if (element && customStyle) Object.entries(customStyle)
       .forEach(([key, value]) => (element as HTMLElement).style[(key as any)] = value);
+
+    if (element) markAsStyled(element);
   });
 }

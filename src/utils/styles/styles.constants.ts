@@ -1,8 +1,8 @@
 // Styles
 
 const lovelaceMatBtnStyle = {
-  borderRadius: 'calc(var(--header-height) + / 2)',
-  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  borderRadius: 'calc(var(--header-height) / 2)',
+  backgroundColor: 'rgba(0, 0, 0, 0.4)',
   backdropFilter: 'blur(2px)'
 }
 
@@ -15,7 +15,9 @@ export const lovelaceContainerStyle = {
 export const lovelaceHeaderStyle = {
   top: 'unset !important',
   bottom: '1em',
-  backgroundColor: 'transparent !important'
+  backgroundColor: 'transparent',
+  boxShadow: 'none',
+  backdropFilter: 'none'
 };
 
 export const lovelaceNavStyle = {
@@ -40,9 +42,10 @@ export const lovelaceTabGroupStyles = `
     border-bottom: none;
   }
   ha-tab-group-tab:not([active]) {
-    opacity: 0.6;
+    filter: brightness(0.5);
   }
 `;
-
+// [active]
+// color: var(--bubble-default-color, var(--state-active-color));
 
 // Other styles

@@ -8,7 +8,7 @@ export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, tim
     const immediate = domTraverser(options, root);
     if (immediate) return resolve(immediate);
 
-    const sourceUrl = getUrlPath();
+    // const sourceUrl = getUrlPath();
     let done = false;
 
     const finish = (el: Element | null) => {
@@ -22,7 +22,8 @@ export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, tim
 
     // 2) наблюдаем за изменениями корня
     const mo = new MutationObserver(() => {
-      if (sourceUrl !== getUrlPath()) finish(null);
+      // if (sourceUrl !== getUrlPath()) finish(null);
+      console.log('Detected DOM change. Attempting to find element.');
 
       const found = domTraverser(options, root);
       if (found) finish(found);

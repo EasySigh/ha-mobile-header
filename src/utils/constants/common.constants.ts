@@ -1,0 +1,1 @@
+export const allowedPages = ['/energy', '/config/dashboard', '/logbook', '/history', '/todo', '/developer-tools/yaml'];

@@ -1,11 +1,12 @@
 interface ElementStyleBase {
   element: HTMLElement | Element | null;
+  elementName?: string;
 }
 
 export interface ElOptionsModel {
   id?: string;
   tagName?: string;
-  classNames?: string[];
+  className?: string;
 }
 
 export type ElementStyleModel =
@@ -24,9 +25,8 @@ export enum PagePath {
   logbook = 'logbook',
   history = 'history',
   todo = 'todo',
-  devtools = 'developer-tools/yaml'
+  devtools = 'developer-tools/yaml',
 }
-
 
 export type PageElementNames = 'container' | 'header' | 'tabs' | 'nav' | 'navContainer' | 'tabGroup' | 'burger' | 'meatballs' | 'topBar' | 'barTitle' | 'barActions';
 export type LovelacePageElements = 'container' | 'header' | 'tabs' | 'nav' | 'navContainer' | 'tabGroup' | 'burger' | 'meatballs';

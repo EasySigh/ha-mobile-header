@@ -5,7 +5,8 @@
   "main": "./ha-navbar-position.js",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=browser --outfile=ha-mobile-header.js",
-    "watch": "tsc --watch"
+    "dev": "npm run build -- --watch",
+    "watch-old": "tsc --watch"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",

@@ -5,13 +5,16 @@ export const getUrlPath = () => location.pathname;
 
 export const processedList = new Set<string>([]);
 export const saveProcessed = () => processedList.add(getUrlPath());
-export const isProcessed = () => processedList.has(getUrlPath());
+export const isProcessed = (path?: string) => processedList.has(path || getUrlPath());
 
 export const isMobile = () => navigator?.userAgentData?.mobile || window.matchMedia('(max-width: 767px)').matches;
-export const canProceed = (path: string) => localStorage.getItem('mh-allowed-pages')?.includes(path) && !isProcessed;
+export const canProceed = (path: string) => !isProcessed(path);
+// export const canProceed = (path: string) => !isProcessed(path);
+// export const canProceed = (path: string) => !localStorage.getItem('mh-excluded-pages')?.includes(path) && !isProcessed();
+export const markAsStyled = (element: HTMLElement | Element) => element.setAttribute('mh-styled', 'true');
+export const isStyled = (element: HTMLElement | Element) => element.getAttribute('mh-styled') !== null;
 
-
-export async function getElement(
+export async function getCachedElement(
   elementCache: Map<string, WeakRef<Element>>,
   rootElement: ShadowRoot | Element,
   pagePath: PagePath,
