@@ -353,6 +353,7 @@
     const path = getUrlPath();
     void runForCurrentPath(path);
     window.addEventListener("popstate", () => {
+      console.log(123);
       const path2 = getUrlPath();
       void runForCurrentPath(path2);
     });

@@ -9,6 +9,7 @@ export const hambStart = () => {
 
   // @ts-ignore
   window.addEventListener("popstate", () => {
+    console.log(123);
     // const path = formatPath(new URL(data?.destination?.url)?.pathname);
     const path = getUrlPath();
     void runForCurrentPath(path);
