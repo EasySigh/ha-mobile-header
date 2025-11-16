@@ -352,8 +352,7 @@
   var hambStart = () => {
     const path = getUrlPath();
     void runForCurrentPath(path);
-    window.addEventListener("popstate", (data) => {
-      if (!data) return;
+    window.addEventListener("popstate", () => {
       const path2 = getUrlPath();
       void runForCurrentPath(path2);
     });

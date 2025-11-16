@@ -8,9 +8,7 @@ export const hambStart = () => {
   void runForCurrentPath(path);
 
   // @ts-ignore
-  window.addEventListener("popstate", (data) => {
-    if (!data) return;
-
+  window.addEventListener("popstate", () => {
     // const path = formatPath(new URL(data?.destination?.url)?.pathname);
     const path = getUrlPath();
     void runForCurrentPath(path);
