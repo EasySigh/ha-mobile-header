@@ -8,8 +8,7 @@ export const hambStart = () => {
   void runForCurrentPath(path);
 
   // @ts-ignore
-  window.addEventListener("location-changed", (data) => {
-    console.log(123)
+  window.addEventListener("popstate", (data) => {
     if (!data) return;
 
     // const path = formatPath(new URL(data?.destination?.url)?.pathname);
