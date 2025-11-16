@@ -7,11 +7,14 @@ import {getBurgerVariants} from "../utils/helpers";
 export async function updatePage(path: string): Promise<void> {
   try {
     const hasBurger = showMenuBtn[path];
-    const haTargetEl: Nullable<HTMLElement> = await waitForElement(getBurgerVariants);
+    const haTargetEl: Nullable<HTMLElement> = hasBurger ? await waitForElement(getBurgerVariants) : null
 
     document.body.insertAdjacentHTML('beforeend', mhWidget(hasBurger));
-    const proxyBurger = document.body.querySelector('#mhBurger');
-    proxyBurger?.addEventListener('click', () => haTargetEl?.click());
+
+    if (hasBurger) {
+      const proxyBurger = document.body.querySelector('#mhBurger');
+      proxyBurger?.addEventListener('click', () => haTargetEl?.click());
+    }
 
     const mhQuickLink = document.body.querySelector('#mhQuickLink');
     mhQuickLink?.addEventListener('click', () => {

@@ -333,10 +333,12 @@
   async function updatePage(path) {
     try {
       const hasBurger = showMenuBtn[path];
-      const haTargetEl = await waitForElement(getBurgerVariants);
+      const haTargetEl = hasBurger ? await waitForElement(getBurgerVariants) : null;
       document.body.insertAdjacentHTML("beforeend", mhWidget(hasBurger));
-      const proxyBurger = document.body.querySelector("#mhBurger");
-      proxyBurger?.addEventListener("click", () => haTargetEl?.click());
+      if (hasBurger) {
+        const proxyBurger = document.body.querySelector("#mhBurger");
+        proxyBurger?.addEventListener("click", () => haTargetEl?.click());
+      }
       const mhQuickLink = document.body.querySelector("#mhQuickLink");
       mhQuickLink?.addEventListener("click", () => {
         history.pushState(null, "", "/lovelace");
