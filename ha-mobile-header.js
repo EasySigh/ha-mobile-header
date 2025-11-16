@@ -82,10 +82,6 @@
   }
   function waitForElement(variantsFn, timeoutMs = 3e3) {
     return new Promise((resolve) => {
-      console.log("-------------------");
-      console.log("Variants:");
-      console.log(variantsFn().filter(Boolean));
-      console.log("-------------------");
       const immediate = variantsFn().filter(Boolean)[0];
       if (immediate) return resolve(immediate);
       let done = false;
@@ -243,6 +239,8 @@
   display: flex;
   backdrop-filter: blur(1px);
   background-color: rgba(0,0,0,.6);
+  transform: scale(0);
+  transition: transform 0.1s linear;
 `;
   var mhButtonStyles = `
   border-radius: 50%;
@@ -336,26 +334,22 @@
   // src/pages/common.handler.ts
   async function updatePage(path) {
     try {
-      console.log("Starting...");
       const hasBurger = showMenuBtn[path];
-      console.log(`Page hasBurger: ${hasBurger}`);
       const haTargetEl = hasBurger ? await waitForElement(getBurgerVariants) : null;
-      console.log("Target burger element:", haTargetEl);
       document.body.insertAdjacentHTML("beforeend", mhWidget(hasBurger));
-      console.log("Widget inserted.");
       if (hasBurger) {
-        console.log("Add Burger event...");
         const proxyBurger = document.body.querySelector("#mhBurger");
-        proxyBurger?.addEventListener("click", () => {
-          console.log("Proxy burger clicked!");
-          haTargetEl?.click();
-        });
+        proxyBurger?.addEventListener("click", () => haTargetEl?.click());
       }
       const mhQuickLink = document.body.querySelector("#mhQuickLink");
       mhQuickLink?.addEventListener("click", () => {
         history.pushState(null, "", "/lovelace");
         window.dispatchEvent(new Event("location-changed"));
       });
+      setTimeout(() => {
+        const mhWidgetEl = document.body.querySelector("#mhWidget");
+        mhWidgetEl.style.transform = "scale(1)";
+      }, 100);
     } catch (e) {
       console.error(e);
     }
@@ -369,8 +363,6 @@
     navigation.addEventListener("navigate", (data) => {
       if (!data) return;
       const path2 = formatPath(new URL(data?.destination?.url)?.pathname);
-      console.log(`Event emitted. Last path: ${lastPath}. Path: ${path2}. Is new page: ${path2 !== lastPath}`);
-      console.log(`Can continue: ${path2 !== lastPath}`);
       if (path2 === lastPath) return;
       lastPath = path2;
       void runForCurrentPath(path2);
@@ -380,7 +372,7 @@
     const oldMHWidget = document.body.querySelector("#mhWidget");
     if (!!oldMHWidget) oldMHWidget.remove();
     if (path.includes("lovelace") && !isLovelaceProcessed) void updateLovelace();
-    else if (allowedPages.includes(path)) void updatePage(path);
+    else if (allowedPages.includes(path)) setTimeout(() => void updatePage(path), 200);
   }
 
   // src/index.ts

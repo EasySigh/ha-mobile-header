@@ -7,6 +7,8 @@ const mhWidgetStyles = `
   display: flex;
   backdrop-filter: blur(1px);
   background-color: rgba(0,0,0,.6);
+  transform: scale(0);
+  transition: transform 0.1s linear;
 `;
 
 const mhButtonStyles = `

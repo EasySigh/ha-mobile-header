@@ -33,10 +33,6 @@ export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, tim
 
 export function waitForElement(variantsFn: () => Nullable<HTMLElement>[], timeoutMs = 3000): Promise<Nullable<HTMLElement>> {
   return new Promise((resolve) => {
-    console.log('-------------------');
-    console.log('Variants:');
-    console.log(variantsFn().filter(Boolean));
-    console.log('-------------------');
     const immediate: Nullable<HTMLElement> = variantsFn().filter(Boolean)[0];
     if (immediate) return resolve(immediate);
 

@@ -6,22 +6,14 @@ import {getBurgerVariants} from "../utils/helpers";
 
 export async function updatePage(path: string): Promise<void> {
   try {
-    console.log('Starting...');
     const hasBurger = showMenuBtn[path];
-    console.log(`Page hasBurger: ${hasBurger}`);
     const haTargetEl: Nullable<HTMLElement> = hasBurger ? await waitForElement(getBurgerVariants) : null
 
-    console.log('Target burger element:', haTargetEl)
     document.body.insertAdjacentHTML('beforeend', mhWidget(hasBurger));
-    console.log('Widget inserted.')
 
     if (hasBurger) {
-      console.log('Add Burger event...');
       const proxyBurger = document.body.querySelector('#mhBurger');
-      proxyBurger?.addEventListener('click', () => {
-        console.log('Proxy burger clicked!');
-        haTargetEl?.click();
-      });
+      proxyBurger?.addEventListener('click', () => haTargetEl?.click());
     }
 
     const mhQuickLink = document.body.querySelector('#mhQuickLink');
@@ -29,6 +21,11 @@ export async function updatePage(path: string): Promise<void> {
       history.pushState(null, "", "/lovelace");
       window.dispatchEvent(new Event("location-changed"));
     });
+
+    setTimeout(() => {
+      const mhWidgetEl = document.body.querySelector('#mhWidget') as HTMLElement;
+      mhWidgetEl!.style.transform = 'scale(1)';
+    }, 100);
   } catch (e) {
     console.error(e);
   }

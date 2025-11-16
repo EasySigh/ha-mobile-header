@@ -15,10 +15,9 @@ export const hambStart = () => {
 
     const path = formatPath(new URL(data?.destination?.url)?.pathname);
 
-    console.log(`Event emitted. Last path: ${lastPath}. Path: ${path}. Is new page: ${path !== lastPath}`);
-    console.log(`Can continue: ${path !== lastPath}`);
     if (path === lastPath) return;
     lastPath = path;
+
     void runForCurrentPath(path);
   });
 }
@@ -28,5 +27,5 @@ async function runForCurrentPath(path: string): Promise<void> {
   if (!!oldMHWidget) oldMHWidget.remove();
 
   if (path.includes('lovelace') && !isLovelaceProcessed) void updateLovelace()
-  else if (allowedPages.includes(path)) void updatePage(path);
+  else if (allowedPages.includes(path)) setTimeout(() => void updatePage(path), 200);
 }
