@@ -1,7 +1,9 @@
+import {Nullable} from "../../models/common.model";
+
 export const burgerSelectors = [
   'document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-dashboard")?.shadowRoot?.querySelector("ha-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")',
   `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-todo")?.shadowRoot?.querySelector("ha-two-pane-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-  `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-developer-tools")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
+  `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-developer-tools")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
 ];
 
 export const backBtnSelectors = [
@@ -13,4 +15,4 @@ export const backBtnSelectors = [
   `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-areas > ha-config-areas-dashboard")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
   `document.querySelector("body > hassio-main")?.shadowRoot?.querySelector("hassio-router > hassio-panel")?.shadowRoot?.querySelector("hassio-panel-router > hassio-dashboard")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
   `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-tags")?.shadowRoot?.querySelector("#id")?.shadowRoot.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
-]
+];

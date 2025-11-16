@@ -1,5 +1,35 @@
 "use strict";
 (() => {
+  // src/utils/helpers.ts
+  var getUrlPath = () => formatPath(location.pathname);
+  var isLovelaceProcessed = false;
+  var saveProcessed = () => isLovelaceProcessed = true;
+  var isMobile = () => navigator?.userAgentData?.mobile || window.matchMedia("(max-width: 767px)").matches;
+  var markAsStyled = (element) => element.setAttribute("mh-styled", "true");
+  var isStyled = (element) => element.getAttribute("mh-styled") !== null;
+  function formatPath(path) {
+    if (!path) return "";
+    return path.replace(/^\/|\/$/g, "");
+  }
+  function getBurgerVariants() {
+    return [
+      document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-dashboard")?.shadowRoot?.querySelector("ha-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button"),
+      document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-todo")?.shadowRoot?.querySelector("ha-two-pane-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button"),
+      document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-developer-tools")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button"),
+      document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-energy")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")
+    ];
+  }
+
+  // src/utils/constants/element-options.constants.ts
+  var lovelaceContainerOption = [{ tagName: "hui-view-container", id: "view" }];
+  var lovelaceHeaderOption = [{ tagName: "div", className: "header" }];
+  var lovelaceTabsOption = [{ className: "tabs" }];
+  var lovelaceNavOption = [{ className: "nav" }];
+  var lovelaceNavArrowsOption = [{ tagName: "wa-button", className: "scroll-button" }];
+  var lovelaceTabGroupOption = [{ tagName: "ha-tab-group", className: "" }];
+  var lovelaceBurgerOption = [{ tagName: "ha-menu-button", className: "" }];
+  var lovelaceMeatballsOption = [{ tagName: "ha-button-menu", className: "" }];
+
   // src/utils/dom-traverser.ts
   function domTraverser(options, root = document.body) {
     const matches = (el) => {
@@ -15,14 +45,14 @@
       if (node instanceof HTMLElement && matches(node)) return node;
       if (node instanceof HTMLElement && node.shadowRoot) {
         try {
-          const found2 = traverse(node.shadowRoot);
-          if (found2) return found2;
+          const found = traverse(node.shadowRoot);
+          if (found) return found;
         } catch (e) {
         }
       }
       for (const child of node.childNodes) {
-        const found2 = traverse(child);
-        if (found2) return found2;
+        const found = traverse(child);
+        if (found) return found;
       }
       return null;
     };
@@ -30,29 +60,29 @@
   }
 
   // src/utils/observer.ts
-  function waitFor(options, root, timeoutMs2 = 5e3) {
-    return new Promise((resolve2) => {
-      const immediate2 = domTraverser(options, root);
-      if (immediate2) return resolve2(immediate2);
-      let done2 = false;
-      const finish2 = (el) => {
-        if (done2) return;
-        done2 = true;
+  function waitFor(options, root, timeoutMs = 5e3) {
+    return new Promise((resolve) => {
+      const immediate = domTraverser(options, root);
+      if (immediate) return resolve(immediate);
+      let done = false;
+      const finish = (el) => {
+        if (done) return;
+        done = true;
         mo.disconnect();
-        clearTimeout(tid2);
-        resolve2(el);
+        clearTimeout(tid);
+        resolve(el);
       };
       const mo = new MutationObserver(() => {
-        const found2 = domTraverser(options, root);
-        if (found2) finish2(found2);
+        const found = domTraverser(options, root);
+        if (found) finish(found);
       });
       mo.observe(document.documentElement, { childList: true, subtree: true });
-      const tid2 = setTimeout(() => finish2(null), timeoutMs2);
+      const tid = setTimeout(() => finish(null), timeoutMs);
     });
   }
-  function waitForElement(selectorList, timeoutMs = 3e3) {
+  function waitForElement(variantsFn, timeoutMs = 3e3) {
     return new Promise((resolve) => {
-      const immediate = selectorList.map((selector) => eval(selector)).filter(Boolean)[0];
+      const immediate = variantsFn().filter(Boolean)[0];
       if (immediate) return resolve(immediate);
       let done = false;
       const finish = (el) => {
@@ -63,34 +93,12 @@
         resolve(el);
       };
       const intervalId = setInterval(() => {
-        const found = selectorList.map((selector) => eval(selector)).filter(Boolean)[0];
+        const found = variantsFn().filter(Boolean)[0];
         if (found) finish(found);
       }, 100);
       const tid = setTimeout(() => finish(null), timeoutMs);
     });
   }
-
-  // src/utils/helpers.ts
-  var getUrlPath = () => formatPath(location.pathname);
-  var isLovelaceProcessed = false;
-  var saveProcessed = () => isLovelaceProcessed = true;
-  var isMobile = () => navigator?.userAgentData?.mobile || window.matchMedia("(max-width: 767px)").matches;
-  var markAsStyled = (element) => element.setAttribute("mh-styled", "true");
-  var isStyled = (element) => element.getAttribute("mh-styled") !== null;
-  function formatPath(path) {
-    if (!path) return "";
-    return path.replace(/^\/|\/$/g, "");
-  }
-
-  // src/utils/constants/element-options.constants.ts
-  var lovelaceContainerOption = [{ tagName: "hui-view-container", id: "view" }];
-  var lovelaceHeaderOption = [{ tagName: "div", className: "header" }];
-  var lovelaceTabsOption = [{ className: "tabs" }];
-  var lovelaceNavOption = [{ className: "nav" }];
-  var lovelaceNavArrowsOption = [{ tagName: "wa-button", className: "scroll-button" }];
-  var lovelaceTabGroupOption = [{ tagName: "ha-tab-group", className: "" }];
-  var lovelaceBurgerOption = [{ tagName: "ha-menu-button", className: "" }];
-  var lovelaceMeatballsOption = [{ tagName: "ha-button-menu", className: "" }];
 
   // src/utils/styles/styles.constants.ts
   var lovelaceMatBtnStyle = {
@@ -225,7 +233,8 @@
   var mhWidgetStyles = `
   position: fixed;
   z-index: 2;
-  left: 1.5em;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
   border-radius: 24px;
   display: flex;
@@ -275,79 +284,36 @@
    </svg>
   </button>
 `;
-  var mhWidget = (isBackType) => `
+  var mhWidget = (hasBurger) => `
   <div style="${mhWidgetStyles}" id="mhWidget">
-    ${isBackType ? mhBackBtnElement : mhBurgerBtnElement}
+    ${hasBurger ? mhBurgerBtnElement : ""}
 
     ${mhQuickLinkBtnElement}
   </div>
 `;
 
-  // src/utils/constants/common.constants.ts
-  var allowedPages = [
-    "energy",
-    "config/dashboard",
-    "logbook",
-    "history",
-    "todo",
-    "developer-tools/yaml",
-    "config/integrations/dashboard",
-    "config/voice-assistants/assistants",
-    "config/automation/dashboard",
-    "config/cloud/account",
-    "hassio/dashboard",
-    "config/areas/dashboard",
-    "config/lovelace/dashboards",
-    "config/tags",
-    "config/person",
-    "config/system"
-  ];
-  var isPageBackBtn = {
-    "energy": false,
-    "config/dashboard": false,
-    "logbook": true,
-    "history": true,
-    "todo": false,
-    "developer-tools/yaml": false,
-    "config/integrations/dashboard": true,
-    "config/voice-assistants/assistants": true,
-    "config/automation/dashboard": true,
-    "config/cloud/account": true,
-    "hassio/dashboard": true,
-    "config/areas/dashboard": true,
-    "config/lovelace/dashboards": true,
-    "config/tags": true,
-    "config/person": true,
-    "config/system": true
+  // src/utils/constants/paths.constants.ts
+  var showMenuBtn = {
+    "energy": true,
+    "config/dashboard": true,
+    "todo": true,
+    "developer-tools/yaml": true
   };
-
-  // src/utils/constants/selectors.constants.ts
-  var burgerSelectors = [
-    'document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-dashboard")?.shadowRoot?.querySelector("ha-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")',
-    `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-todo")?.shadowRoot?.querySelector("ha-two-pane-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-developer-tools")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
-  ];
-  var backBtnSelectors = [
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-integrations > ha-config-integrations-dashboard")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-voice-assistants > ha-config-voice-assistants-assistants")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-automation > ha-automation-picker")?.shadowRoot?.querySelector("#entity_id")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-cloud > cloud-account")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > hassio-main")?.shadowRoot?.querySelector("hassio-router > hassio-panel")?.shadowRoot?.querySelector("hassio-panel-router > hassio-dashboard")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-areas > ha-config-areas-dashboard")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > hassio-main")?.shadowRoot?.querySelector("hassio-router > hassio-panel")?.shadowRoot?.querySelector("hassio-panel-router > hassio-dashboard")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
-    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-tags")?.shadowRoot?.querySelector("#id")?.shadowRoot.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
-  ];
+  var allowedPages = Object.keys(showMenuBtn);
 
   // src/pages/common.handler.ts
   async function updatePage(path) {
     try {
-      const isBackBtn = isPageBackBtn[path];
-      const haTargetEl = await waitForElement(isBackBtn ? backBtnSelectors : burgerSelectors);
-      document.body.insertAdjacentHTML("beforeend", mhWidget(isBackBtn));
-      const proxyBtn = document.body.querySelector(isBackBtn ? "#mhBack" : "#mhBurger");
-      proxyBtn?.addEventListener("click", () => haTargetEl?.click());
+      const hasBurger = showMenuBtn[path];
+      const haTargetEl = await waitForElement(getBurgerVariants);
+      document.body.insertAdjacentHTML("beforeend", mhWidget(hasBurger));
+      const proxyBurger = document.body.querySelector("#mhBurger");
+      proxyBurger?.addEventListener("click", () => haTargetEl?.click());
       const mhQuickLink = document.body.querySelector("#mhQuickLink");
-      mhQuickLink?.addEventListener("click", () => window.location.href = "/lovelace");
+      mhQuickLink?.addEventListener("click", () => {
+        history.pushState(null, "", "/lovelace");
+        window.dispatchEvent(new Event("location-changed"));
+      });
     } catch (e) {
       console.error(e);
     }

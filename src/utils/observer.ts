@@ -31,9 +31,9 @@ export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, tim
   });
 }
 
-export function waitForElement(selectorList: string[], timeoutMs = 3000): Promise<Nullable<HTMLElement>> {
+export function waitForElement(variantsFn: () => Nullable<HTMLElement>[], timeoutMs = 3000): Promise<Nullable<HTMLElement>> {
   return new Promise((resolve) => {
-    const immediate: Nullable<HTMLElement> = selectorList.map(selector => eval(selector)).filter(Boolean)[0];
+    const immediate: Nullable<HTMLElement> = variantsFn().filter(Boolean)[0];
     if (immediate) return resolve(immediate);
 
     let done = false;
@@ -48,7 +48,7 @@ export function waitForElement(selectorList: string[], timeoutMs = 3000): Promis
     };
 
     const intervalId = setInterval(() => {
-      const found = selectorList.map(selector => eval(selector)).filter(Boolean)[0];
+      const found = variantsFn().filter(Boolean)[0];
       if (found) finish(found);
     }, 100);
 

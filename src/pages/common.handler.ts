@@ -1,20 +1,23 @@
 import {waitForElement} from "../utils/observer";
 import {mhWidget} from "../utils/constants/custom-elements.constants";
-import {isPageBackBtn} from "../utils/constants/common.constants";
+import {showMenuBtn} from "../utils/constants/paths.constants";
 import {Nullable} from "../models/common.model";
-import {backBtnSelectors, burgerSelectors} from "../utils/constants/selectors.constants";
+import {getBurgerVariants} from "../utils/helpers";
 
 export async function updatePage(path: string): Promise<void> {
   try {
-    const isBackBtn = isPageBackBtn[path];
-    const haTargetEl: Nullable<HTMLElement> = await waitForElement(isBackBtn ? backBtnSelectors : burgerSelectors);
+    const hasBurger = showMenuBtn[path];
+    const haTargetEl: Nullable<HTMLElement> = await waitForElement(getBurgerVariants);
 
-    document.body.insertAdjacentHTML('beforeend', mhWidget(isBackBtn));
-    const proxyBtn = document.body.querySelector(isBackBtn ? '#mhBack' : '#mhBurger');
-    proxyBtn?.addEventListener('click', () => haTargetEl?.click());
+    document.body.insertAdjacentHTML('beforeend', mhWidget(hasBurger));
+    const proxyBurger = document.body.querySelector('#mhBurger');
+    proxyBurger?.addEventListener('click', () => haTargetEl?.click());
 
     const mhQuickLink = document.body.querySelector('#mhQuickLink');
-    mhQuickLink?.addEventListener('click', () => window.location.href = '/lovelace');
+    mhQuickLink?.addEventListener('click', () => {
+      history.pushState(null, "", "/lovelace");
+      window.dispatchEvent(new Event("location-changed"));
+    });
   } catch (e) {
     console.error(e);
   }

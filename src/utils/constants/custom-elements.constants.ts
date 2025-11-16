@@ -1,9 +1,8 @@
-// bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
-
 const mhWidgetStyles = `
   position: fixed;
   z-index: 2;
-  left: 1.5em;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
   border-radius: 24px;
   display: flex;
@@ -58,9 +57,9 @@ const mhQuickLinkBtnElement = `
   </button>
 `;
 
-export const mhWidget = (isBackType: boolean) => `
+export const mhWidget = (hasBurger: boolean) => `
   <div style="${mhWidgetStyles}" id="mhWidget">
-    ${isBackType ? mhBackBtnElement : mhBurgerBtnElement}
+    ${hasBurger ? mhBurgerBtnElement: ''}
 
     ${mhQuickLinkBtnElement}
   </div>

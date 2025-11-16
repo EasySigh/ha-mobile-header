@@ -1,17 +1,24 @@
 import {ElementStyleModel} from "../models/common.model";
 import {
-  containerCache,
-  headerCache, lovelaceBurgerOption,
+  lovelaceBurgerOption,
   lovelaceContainerOption,
-  lovelaceHeaderOption, lovelaceMeatballsOption, lovelaceNavArrowsOption, lovelaceNavOption, lovelaceTabGroupOption,
+  lovelaceHeaderOption,
+  lovelaceMeatballsOption,
+  lovelaceNavArrowsOption,
+  lovelaceNavOption,
+  lovelaceTabGroupOption,
   lovelaceTabsOption
 } from "../utils/constants/element-options.constants";
 import {waitFor} from "../utils/observer";
 import {
   lovelaceBurgerStyle,
   lovelaceContainerStyle,
-  lovelaceHeaderStyle, lovelaceMeatballsStyle, lovelaceNavArrowsStyle,
-  lovelaceNavStyle, lovelaceTabGroupStyles, lovelaceTabsStyle
+  lovelaceHeaderStyle,
+  lovelaceMeatballsStyle,
+  lovelaceNavArrowsStyle,
+  lovelaceNavStyle,
+  lovelaceTabGroupStyles,
+  lovelaceTabsStyle
 } from "../utils/styles/styles.constants";
 import {isStyled, markAsStyled, saveProcessed} from "../utils/helpers";
 
