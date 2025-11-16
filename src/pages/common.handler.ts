@@ -1,55 +1,21 @@
-import {PagePath} from "../models/common.model";
-import {getCachedElement} from "../utils/helpers";
-import {
-  burgerButton,
-  containerCache,
-  containerOptions,
-  lovelaceButton,
-  menuButton
-} from "../utils/constants/element-options.constants";
-import {waitFor} from "../utils/observer";
+import {waitForElement} from "../utils/observer";
 import {mhWidget} from "../utils/constants/custom-elements.constants";
+import {isPageBackBtn} from "../utils/constants/common.constants";
+import {Nullable} from "../models/common.model";
+import {backBtnSelectors, burgerSelectors} from "../utils/constants/selectors.constants";
 
-interface PageElements {
-  container: Element;
-  burger: HTMLElement | null;
-  lovelaceMenuItem: HTMLElement | null;
-}
-
-export async function updatePage(path: PagePath): Promise<void> {
+export async function updatePage(path: string): Promise<void> {
   try {
-    const { container, burger, lovelaceMenuItem } = await getElements(path);
+    const isBackBtn = isPageBackBtn[path];
+    const haTargetEl: Nullable<HTMLElement> = await waitForElement(isBackBtn ? backBtnSelectors : burgerSelectors);
 
-    // const mhWidgetElement = container.querySelector('#mh-widget');
-    // if (!!mhWidgetElement) {
-    //   console.log('Widget already added');
-    //   mhWidgetElement.remove();
-    //   console.log('after remove()', mhWidgetElement)
-    // }
+    document.body.insertAdjacentHTML('beforeend', mhWidget(isBackBtn));
+    const proxyBtn = document.body.querySelector(isBackBtn ? '#mhBack' : '#mhBurger');
+    proxyBtn?.addEventListener('click', () => haTargetEl?.click());
 
-    container.insertAdjacentHTML('beforeend', mhWidget);
-
-    const mhBurger = container.querySelector('#mhBurger');
-    mhBurger?.addEventListener('click', () => burger?.click());
-
-    const mhQuickLink = container.querySelector('#mhQuickLink');
-    mhQuickLink?.addEventListener('click', () => lovelaceMenuItem?.click());
+    const mhQuickLink = document.body.querySelector('#mhQuickLink');
+    mhQuickLink?.addEventListener('click', () => window.location.href = '/lovelace');
   } catch (e) {
     console.error(e);
   }
-}
-
-async function getElements(pagePath: PagePath): Promise<PageElements> {
-  const rootElement = document?.querySelector('home-assistant')?.shadowRoot?.querySelector('home-assistant-main')?.shadowRoot || document.body;
-  const sidebarElement = rootElement?.querySelector("ha-sidebar")?.shadowRoot?.querySelector("ha-md-list.ha-scrollbar > ha-md-list-item:nth-child(1)")?.shadowRoot;
-
-  const container = await getCachedElement(containerCache, rootElement, pagePath, containerOptions);
-  if (!container) throw new Error("Could not find container.");
-
-  const burger = await waitFor(burgerButton, rootElement, 0) as HTMLElement | null;
-
-  if (!sidebarElement) throw new Error("Could not find sidebar.");
-  const lovelaceMenuItem = await waitFor(lovelaceButton, sidebarElement, 0) as HTMLElement | null;
-
-  return { container, burger, lovelaceMenuItem };
 }

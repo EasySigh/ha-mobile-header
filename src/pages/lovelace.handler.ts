@@ -1,4 +1,4 @@
-import {ElementStyleModel, PagePath} from "../models/common.model";
+import {ElementStyleModel} from "../models/common.model";
 import {
   containerCache,
   headerCache, lovelaceBurgerOption,
@@ -13,11 +13,11 @@ import {
   lovelaceHeaderStyle, lovelaceMeatballsStyle, lovelaceNavArrowsStyle,
   lovelaceNavStyle, lovelaceTabGroupStyles, lovelaceTabsStyle
 } from "../utils/styles/styles.constants";
-import {getCachedElement, isStyled, markAsStyled, saveProcessed} from "../utils/helpers";
+import {isStyled, markAsStyled, saveProcessed} from "../utils/helpers";
 
-export async function updateLovelace(pagePath: PagePath): Promise<void> {
+export async function updateLovelace(): Promise<void> {
   try {
-    const elementStylesList = await getStyleList(pagePath);
+    const elementStylesList = await getStyleList();
     if (!elementStylesList?.length) return;
 
     // If header was already styled, save page as processed and stop process.
@@ -34,8 +34,8 @@ export async function updateLovelace(pagePath: PagePath): Promise<void> {
   }
 }
 
-async function getStyleList(pagePath: PagePath): Promise<ElementStyleModel[]> {
-  const { container, header, tabs, nav, navArrows, tabGroup, burger, meatballs } = await getElements(pagePath);
+async function getStyleList(): Promise<ElementStyleModel[]> {
+  const { container, header, tabs, nav, navArrows, tabGroup, burger, meatballs } = await getElements();
 
   return [
     {
@@ -74,13 +74,13 @@ async function getStyleList(pagePath: PagePath): Promise<ElementStyleModel[]> {
   ];
 }
 
-async function getElements(pagePath: PagePath): Promise<{ [key: string]: Element | null }> {
+async function getElements(): Promise<{ [key: string]: Element | null }> {
   const rootElement = document?.querySelector('home-assistant')?.shadowRoot?.querySelector('home-assistant-main')?.shadowRoot || document.body;
 
-  const container = await getCachedElement(containerCache, rootElement, pagePath, lovelaceContainerOption);
+  const container = await waitFor(lovelaceContainerOption, rootElement);
   if (!container) throw new Error("Could not find container.");
 
-  const header = await getCachedElement(headerCache, rootElement, pagePath, lovelaceHeaderOption);
+  const header = await waitFor(lovelaceHeaderOption, rootElement);
   if (!header) throw new Error("Could not find header");
 
   const tabs = await waitFor(lovelaceTabsOption, header, 0);

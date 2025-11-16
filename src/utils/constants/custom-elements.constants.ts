@@ -1,21 +1,25 @@
+// bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
+
+const mhWidgetStyles = `
+  position: fixed;
+  z-index: 2;
+  left: 1.5em;
+  bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
+  border-radius: 24px;
+  display: flex;
+  backdrop-filter: blur(1px);
+  background-color: rgba(0,0,0,.6);
+`;
+
 const mhButtonStyles = `
   border-radius: 50%;
   padding: 12px;
   height: 48px;
   width: 48px;
   border: none;
+  outline: none;
   fill: white;
   background-color: transparent;
-`;
-
-const mhWidgetStyles = `
-  position: fixed;
-  left: 1em;
-  bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
-  border-radius: 24px;
-  display: flex;
-  backdrop-filter: blur(1px);
-  background-color: rgba(0,0,0,.6);
 `;
 
 const mhBurgerBtnElement = `
@@ -31,7 +35,7 @@ const mhBurgerBtnElement = `
 `;
 
 const mhBackBtnElement = `
-  <button style="${mhButtonStyles}" id="mhBurger">  
+  <button style="${mhButtonStyles}" id="mhBack">  
     <svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24">
       <g>
         <!--?lit$207365439$-->
@@ -54,9 +58,9 @@ const mhQuickLinkBtnElement = `
   </button>
 `;
 
-export const mhWidget = (isBurgerType: boolean) => `
-  <div style="${mhWidgetStyles}" id="mh-widget">
-    ${isBurgerType ? mhBurgerBtnElement : mhBackBtnElement}
+export const mhWidget = (isBackType: boolean) => `
+  <div style="${mhWidgetStyles}" id="mhWidget">
+    ${isBackType ? mhBackBtnElement : mhBurgerBtnElement}
 
     ${mhQuickLinkBtnElement}
   </div>

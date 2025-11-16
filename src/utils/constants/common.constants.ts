@@ -1,1 +1,37 @@
-export const allowedPages = ['/energy', '/config/dashboard', '/logbook', '/history', '/todo', '/developer-tools/yaml'];
+export const allowedPages = [
+  'energy',
+  'config/dashboard',
+  'logbook',
+  'history',
+  'todo',
+  'developer-tools/yaml',
+  'config/integrations/dashboard',
+  'config/voice-assistants/assistants',
+  'config/automation/dashboard',
+  'config/cloud/account',
+  'hassio/dashboard',
+  'config/areas/dashboard',
+  'config/lovelace/dashboards',
+  'config/tags',
+  'config/person',
+  'config/system'
+];
+
+export const isPageBackBtn: { [key: string]: boolean } = {
+  'energy': false,
+  'config/dashboard': false,
+  'logbook': true,
+  'history': true,
+  'todo': false,
+  'developer-tools/yaml': false,
+  'config/integrations/dashboard': true,
+  'config/voice-assistants/assistants': true,
+  'config/automation/dashboard': true,
+  'config/cloud/account': true,
+  'hassio/dashboard': true,
+  'config/areas/dashboard': true,
+  'config/lovelace/dashboards': true,
+  'config/tags': true,
+  'config/person': true,
+  'config/system': true,
+}

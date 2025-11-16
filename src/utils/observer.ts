@@ -1,17 +1,15 @@
-import {ElOptionsModel} from "../models/common.model";
+import {ElOptionsModel, Nullable} from "../models/common.model";
 import {domTraverser} from "./dom-traverser";
-import {getUrlPath} from "./helpers";
 
-export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, timeoutMs = 5000): Promise<Element | null> {
+export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, timeoutMs = 5000): Promise<HTMLElement | null> {
   return new Promise((resolve) => {
-    // 1) мгновенная попытка
+    // 1) immediate attempt
     const immediate = domTraverser(options, root);
-    if (immediate) return resolve(immediate);
+    if (immediate) return resolve(immediate as HTMLElement);
 
-    // const sourceUrl = getUrlPath();
     let done = false;
 
-    const finish = (el: Element | null) => {
+    const finish = (el: HTMLElement | null) => {
       if (done) return;
 
       done = true;
@@ -20,18 +18,40 @@ export function waitFor(options: ElOptionsModel[], root?: Node | ShadowRoot, tim
       resolve(el);
     };
 
-    // 2) наблюдаем за изменениями корня
+    // 2) tracking DOM changes
     const mo = new MutationObserver(() => {
-      // if (sourceUrl !== getUrlPath()) finish(null);
-      console.log('Detected DOM change. Attempting to find element.');
-
       const found = domTraverser(options, root);
       if (found) finish(found);
     });
 
     mo.observe(document.documentElement, { childList: true, subtree: true });
 
-    // 3) таймаут
+    // 3) timeout
+    const tid = setTimeout(() => finish(null), timeoutMs);
+  });
+}
+
+export function waitForElement(selectorList: string[], timeoutMs = 3000): Promise<Nullable<HTMLElement>> {
+  return new Promise((resolve) => {
+    const immediate: Nullable<HTMLElement> = selectorList.map(selector => eval(selector)).filter(Boolean)[0];
+    if (immediate) return resolve(immediate);
+
+    let done = false;
+
+    const finish = (el: Nullable<HTMLElement>) => {
+      if (done) return;
+
+      done = true;
+      clearInterval(intervalId);
+      clearTimeout(tid);
+      resolve(el);
+    };
+
+    const intervalId = setInterval(() => {
+      const found = selectorList.map(selector => eval(selector)).filter(Boolean)[0];
+      if (found) finish(found);
+    }, 100);
+
     const tid = setTimeout(() => finish(null), timeoutMs);
   });
 }

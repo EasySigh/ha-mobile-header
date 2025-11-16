@@ -1,7 +1,7 @@
 import { ElOptionsModel } from "../models/common.model";
 
-export function domTraverser(options: ElOptionsModel[], root: Node | ShadowRoot = document): Element | null {
-  const matches = (el: Element): boolean => {
+export function domTraverser(options: ElOptionsModel[], root: Node | ShadowRoot = document.body): HTMLElement | null {
+  const matches = (el: HTMLElement): boolean => {
     return options.map((option) => {
       const { tagName, className, id } = option;
 
@@ -14,10 +14,10 @@ export function domTraverser(options: ElOptionsModel[], root: Node | ShadowRoot 
       .some(Boolean);
   };
 
-  const traverse = (node: Node | ShadowRoot): Element | null => {
-    if (node instanceof Element && matches(node)) return node;
+  const traverse = (node: Node | ShadowRoot): HTMLElement | null => {
+    if (node instanceof HTMLElement && matches(node)) return node;
 
-    if (node instanceof Element && node.shadowRoot) {
+    if (node instanceof HTMLElement && node.shadowRoot) {
       try {
         const found = traverse(node.shadowRoot);
         if (found) return found;

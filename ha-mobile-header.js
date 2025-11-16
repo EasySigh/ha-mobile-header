@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   // src/utils/dom-traverser.ts
-  function domTraverser(options, root = document) {
+  function domTraverser(options, root = document.body) {
     const matches = (el) => {
       return options.map((option) => {
         const { tagName, className, id } = option;
@@ -12,17 +12,17 @@
       }).some(Boolean);
     };
     const traverse = (node) => {
-      if (node instanceof Element && matches(node)) return node;
-      if (node instanceof Element && node.shadowRoot) {
+      if (node instanceof HTMLElement && matches(node)) return node;
+      if (node instanceof HTMLElement && node.shadowRoot) {
         try {
-          const found = traverse(node.shadowRoot);
-          if (found) return found;
+          const found2 = traverse(node.shadowRoot);
+          if (found2) return found2;
         } catch (e) {
         }
       }
       for (const child of node.childNodes) {
-        const found = traverse(child);
-        if (found) return found;
+        const found2 = traverse(child);
+        if (found2) return found2;
       }
       return null;
     };
@@ -30,63 +30,67 @@
   }
 
   // src/utils/observer.ts
-  function waitFor(options, root, timeoutMs = 5e3) {
+  function waitFor(options, root, timeoutMs2 = 5e3) {
+    return new Promise((resolve2) => {
+      const immediate2 = domTraverser(options, root);
+      if (immediate2) return resolve2(immediate2);
+      let done2 = false;
+      const finish2 = (el) => {
+        if (done2) return;
+        done2 = true;
+        mo.disconnect();
+        clearTimeout(tid2);
+        resolve2(el);
+      };
+      const mo = new MutationObserver(() => {
+        const found2 = domTraverser(options, root);
+        if (found2) finish2(found2);
+      });
+      mo.observe(document.documentElement, { childList: true, subtree: true });
+      const tid2 = setTimeout(() => finish2(null), timeoutMs2);
+    });
+  }
+  function waitForElement(selectorList, timeoutMs = 3e3) {
     return new Promise((resolve) => {
-      const immediate = domTraverser(options, root);
+      const immediate = selectorList.map((selector) => eval(selector)).filter(Boolean)[0];
       if (immediate) return resolve(immediate);
       let done = false;
       const finish = (el) => {
         if (done) return;
         done = true;
-        mo.disconnect();
+        clearInterval(intervalId);
         clearTimeout(tid);
         resolve(el);
       };
-      const mo = new MutationObserver(() => {
-        console.log("Detected DOM change. Attempting to find element.");
-        const found = domTraverser(options, root);
+      const intervalId = setInterval(() => {
+        const found = selectorList.map((selector) => eval(selector)).filter(Boolean)[0];
         if (found) finish(found);
-      });
-      mo.observe(document.documentElement, { childList: true, subtree: true });
+      }, 100);
       const tid = setTimeout(() => finish(null), timeoutMs);
     });
   }
 
   // src/utils/helpers.ts
-  var getUrlPath = () => location.pathname;
-  var processedList = /* @__PURE__ */ new Set([]);
-  var saveProcessed = () => processedList.add(getUrlPath());
-  var isProcessed = (path) => processedList.has(path || getUrlPath());
+  var getUrlPath = () => formatPath(location.pathname);
+  var isLovelaceProcessed = false;
+  var saveProcessed = () => isLovelaceProcessed = true;
   var isMobile = () => navigator?.userAgentData?.mobile || window.matchMedia("(max-width: 767px)").matches;
-  var canProceed = (path) => !isProcessed(path);
   var markAsStyled = (element) => element.setAttribute("mh-styled", "true");
   var isStyled = (element) => element.getAttribute("mh-styled") !== null;
-  async function getCachedElement(elementCache, rootElement, pagePath, elementOptions) {
-    const cachedElement = elementCache.get(pagePath)?.deref();
-    const element = cachedElement ?? await waitFor(elementOptions, rootElement);
-    if (!element) logError(`Cannot find element for path, ${pagePath}`);
-    if (element) elementCache.set(pagePath, new WeakRef(element));
-    return element;
-  }
-  function logError(error) {
-    console.error("[HA Mobile header] Script execution has been stopped.");
-    console.info(`[HA Mobile header] ${error}`);
+  function formatPath(path) {
+    if (!path) return "";
+    return path.replace(/^\/|\/$/g, "");
   }
 
   // src/utils/constants/element-options.constants.ts
-  var containerCache = /* @__PURE__ */ new Map();
-  var headerCache = /* @__PURE__ */ new Map();
   var lovelaceContainerOption = [{ tagName: "hui-view-container", id: "view" }];
   var lovelaceHeaderOption = [{ tagName: "div", className: "header" }];
-  var lovelaceTabsOption = [{ tagName: "", className: "tabs" }];
-  var lovelaceNavOption = [{ tagName: "", className: "nav" }];
+  var lovelaceTabsOption = [{ className: "tabs" }];
+  var lovelaceNavOption = [{ className: "nav" }];
   var lovelaceNavArrowsOption = [{ tagName: "wa-button", className: "scroll-button" }];
   var lovelaceTabGroupOption = [{ tagName: "ha-tab-group", className: "" }];
   var lovelaceBurgerOption = [{ tagName: "ha-menu-button", className: "" }];
   var lovelaceMeatballsOption = [{ tagName: "ha-button-menu", className: "" }];
-  var containerOptions = [{ tagName: "ha-config-section" }];
-  var burgerButton = [{ tagName: "button", className: "mdc-icon-button" }];
-  var lovelaceButton = [{ tagName: "a", className: "list-item", id: "item" }];
 
   // src/utils/styles/styles.constants.ts
   var lovelaceMatBtnStyle = {
@@ -129,9 +133,9 @@
 `;
 
   // src/pages/lovelace.handler.ts
-  async function updateLovelace(pagePath) {
+  async function updateLovelace() {
     try {
-      const elementStylesList = await getStyleList(pagePath);
+      const elementStylesList = await getStyleList();
       if (!elementStylesList?.length) return;
       const header = elementStylesList.find((el) => el?.elementName === "header")?.element;
       if (header && isStyled(header)) {
@@ -144,8 +148,8 @@
       console.error(e);
     }
   }
-  async function getStyleList(pagePath) {
-    const { container, header, tabs, nav, navArrows, tabGroup, burger, meatballs } = await getElements(pagePath);
+  async function getStyleList() {
+    const { container, header, tabs, nav, navArrows, tabGroup, burger, meatballs } = await getElements();
     return [
       {
         element: container,
@@ -182,11 +186,11 @@
       }
     ];
   }
-  async function getElements(pagePath) {
+  async function getElements() {
     const rootElement = document?.querySelector("home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot || document.body;
-    const container = await getCachedElement(containerCache, rootElement, pagePath, lovelaceContainerOption);
+    const container = await waitFor(lovelaceContainerOption, rootElement);
     if (!container) throw new Error("Could not find container.");
-    const header = await getCachedElement(headerCache, rootElement, pagePath, lovelaceHeaderOption);
+    const header = await waitFor(lovelaceHeaderOption, rootElement);
     if (!header) throw new Error("Could not find header");
     const tabs = await waitFor(lovelaceTabsOption, header, 0);
     const nav = await waitFor(lovelaceNavOption, header, 0);
@@ -218,23 +222,25 @@
   }
 
   // src/utils/constants/custom-elements.constants.ts
+  var mhWidgetStyles = `
+  position: fixed;
+  z-index: 2;
+  left: 1.5em;
+  bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
+  border-radius: 24px;
+  display: flex;
+  backdrop-filter: blur(1px);
+  background-color: rgba(0,0,0,.6);
+`;
   var mhButtonStyles = `
   border-radius: 50%;
   padding: 12px;
   height: 48px;
   width: 48px;
   border: none;
+  outline: none;
   fill: white;
   background-color: transparent;
-`;
-  var mhWidgetStyles = `
-  position: fixed;
-  left: 1em;
-  bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
-  border-radius: 24px;
-  display: flex;
-  backdrop-filter: blur(1px);
-  background-color: rgba(0,0,0,.6);
 `;
   var mhBurgerBtnElement = `
   <button style="${mhButtonStyles}" id="mhBurger">  
@@ -248,7 +254,7 @@
   </button>
 `;
   var mhBackBtnElement = `
-  <button style="${mhButtonStyles}" id="mhBurger">  
+  <button style="${mhButtonStyles}" id="mhBack">  
     <svg preserveAspectRatio="xMidYMid meet" focusable="false" role="img" aria-hidden="true" viewBox="0 0 24 24">
       <g>
         <!--?lit$207365439$-->
@@ -269,54 +275,98 @@
    </svg>
   </button>
 `;
-  var mhWidget = (isBurgerType) => `
-  <div style="${mhWidgetStyles}" id="mh-widget">
-    ${isBurgerType ? mhBurgerBtnElement : mhBackBtnElement}
+  var mhWidget = (isBackType) => `
+  <div style="${mhWidgetStyles}" id="mhWidget">
+    ${isBackType ? mhBackBtnElement : mhBurgerBtnElement}
 
     ${mhQuickLinkBtnElement}
   </div>
 `;
 
+  // src/utils/constants/common.constants.ts
+  var allowedPages = [
+    "energy",
+    "config/dashboard",
+    "logbook",
+    "history",
+    "todo",
+    "developer-tools/yaml",
+    "config/integrations/dashboard",
+    "config/voice-assistants/assistants",
+    "config/automation/dashboard",
+    "config/cloud/account",
+    "hassio/dashboard",
+    "config/areas/dashboard",
+    "config/lovelace/dashboards",
+    "config/tags",
+    "config/person",
+    "config/system"
+  ];
+  var isPageBackBtn = {
+    "energy": false,
+    "config/dashboard": false,
+    "logbook": true,
+    "history": true,
+    "todo": false,
+    "developer-tools/yaml": false,
+    "config/integrations/dashboard": true,
+    "config/voice-assistants/assistants": true,
+    "config/automation/dashboard": true,
+    "config/cloud/account": true,
+    "hassio/dashboard": true,
+    "config/areas/dashboard": true,
+    "config/lovelace/dashboards": true,
+    "config/tags": true,
+    "config/person": true,
+    "config/system": true
+  };
+
+  // src/utils/constants/selectors.constants.ts
+  var burgerSelectors = [
+    'document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-dashboard")?.shadowRoot?.querySelector("ha-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")',
+    `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-todo")?.shadowRoot?.querySelector("ha-two-pane-top-app-bar-fixed > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document?.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-developer-tools")?.shadowRoot?.querySelector("div > div > ha-menu-button")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
+  ];
+  var backBtnSelectors = [
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-integrations > ha-config-integrations-dashboard")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-voice-assistants > ha-config-voice-assistants-assistants")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-automation > ha-automation-picker")?.shadowRoot?.querySelector("#entity_id")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-cloud > cloud-account")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > hassio-main")?.shadowRoot?.querySelector("hassio-router > hassio-panel")?.shadowRoot?.querySelector("hassio-panel-router > hassio-dashboard")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-areas > ha-config-areas-dashboard")?.shadowRoot?.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > hassio-main")?.shadowRoot?.querySelector("hassio-router > hassio-panel")?.shadowRoot?.querySelector("hassio-panel-router > hassio-dashboard")?.shadowRoot?.querySelector("hass-subpage")?.shadowRoot?.querySelector("div.toolbar > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot?.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`,
+    `document.querySelector("body > home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-config > ha-config-tags")?.shadowRoot?.querySelector("#id")?.shadowRoot.querySelector("hass-tabs-subpage")?.shadowRoot?.querySelector("div.toolbar > slot > div > a > ha-icon-button-arrow-prev")?.shadowRoot?.querySelector("ha-icon-button")?.shadowRoot.querySelector("mwc-icon-button")?.shadowRoot?.querySelector("button")`
+  ];
+
   // src/pages/common.handler.ts
   async function updatePage(path) {
     try {
-      const { container, burger, lovelaceMenuItem } = await getElements2(path);
-      container.insertAdjacentHTML("beforeend", mhWidget);
-      const mhBurger = container.querySelector("#mhBurger");
-      mhBurger?.addEventListener("click", () => burger?.click());
-      const mhQuickLink = container.querySelector("#mhQuickLink");
-      mhQuickLink?.addEventListener("click", () => lovelaceMenuItem?.click());
+      const isBackBtn = isPageBackBtn[path];
+      const haTargetEl = await waitForElement(isBackBtn ? backBtnSelectors : burgerSelectors);
+      document.body.insertAdjacentHTML("beforeend", mhWidget(isBackBtn));
+      const proxyBtn = document.body.querySelector(isBackBtn ? "#mhBack" : "#mhBurger");
+      proxyBtn?.addEventListener("click", () => haTargetEl?.click());
+      const mhQuickLink = document.body.querySelector("#mhQuickLink");
+      mhQuickLink?.addEventListener("click", () => window.location.href = "/lovelace");
     } catch (e) {
       console.error(e);
     }
   }
-  async function getElements2(pagePath) {
-    const rootElement = document?.querySelector("home-assistant")?.shadowRoot?.querySelector("home-assistant-main")?.shadowRoot || document.body;
-    const sidebarElement = rootElement?.querySelector("ha-sidebar")?.shadowRoot?.querySelector("ha-md-list.ha-scrollbar > ha-md-list-item:nth-child(1)")?.shadowRoot;
-    const container = await getCachedElement(containerCache, rootElement, pagePath, containerOptions);
-    if (!container) throw new Error("Could not find container.");
-    const burger = await waitFor(burgerButton, rootElement, 0);
-    if (!sidebarElement) throw new Error("Could not find sidebar.");
-    const lovelaceMenuItem = await waitFor(lovelaceButton, sidebarElement, 0);
-    return { container, burger, lovelaceMenuItem };
-  }
-
-  // src/utils/constants/common.constants.ts
-  var allowedPages = ["/energy", "/config/dashboard", "/logbook", "/history", "/todo", "/developer-tools/yaml"];
 
   // src/ha-mobile-header.ts
   var hambStart = () => {
     const path = getUrlPath();
-    if (canProceed(path)) void runForCurrentPath(path);
+    void runForCurrentPath(path);
     navigation.addEventListener("navigate", (data) => {
       if (!data) return;
-      const path2 = new URL(data?.destination?.url)?.pathname;
-      if (canProceed(path2)) void runForCurrentPath(path2);
+      const path2 = formatPath(new URL(data?.destination?.url)?.pathname);
+      void runForCurrentPath(path2);
     });
   };
   async function runForCurrentPath(path) {
-    console.log("runForCurrentPath", path);
-    if (path.includes("lovelace" /* lovelace */)) void updateLovelace(path);
+    const oldMHWidget = document.body.querySelector("#mhWidget");
+    if (!!oldMHWidget) oldMHWidget.remove();
+    if (path.includes("lovelace") && !isLovelaceProcessed) void updateLovelace();
     else if (allowedPages.includes(path)) void updatePage(path);
   }
 

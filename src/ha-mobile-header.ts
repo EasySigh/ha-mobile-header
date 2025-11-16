@@ -1,24 +1,25 @@
-import {canProceed, getUrlPath} from "./utils/helpers";
-import {PagePath} from "./models/common.model";
+import {formatPath, getUrlPath, isLovelaceProcessed} from "./utils/helpers";
 import {updateLovelace} from "./pages/lovelace.handler";
 import {updatePage} from "./pages/common.handler";
 import {allowedPages} from "./utils/constants/common.constants";
 
 export const hambStart = () => {
-  const path = getUrlPath() as PagePath;
-  if (canProceed(path)) void runForCurrentPath(path);
+  const path = getUrlPath();
+  void runForCurrentPath(path);
 
   // @ts-ignore
   navigation.addEventListener("navigate", (data) => {
     if (!data) return;
-    const path = new URL(data?.destination?.url)?.pathname as PagePath;
-    if (canProceed(path)) void runForCurrentPath(path);
+
+    const path = formatPath(new URL(data?.destination?.url)?.pathname);
+    void runForCurrentPath(path);
   });
 }
 
-async function runForCurrentPath(path: PagePath): Promise<void> {
-  console.log('runForCurrentPath', path);
+async function runForCurrentPath(path: string): Promise<void> {
+  const oldMHWidget = document.body.querySelector('#mhWidget');
+  if (!!oldMHWidget) oldMHWidget.remove();
 
-  if (path.includes(PagePath.lovelace)) void updateLovelace(path)
+  if (path.includes('lovelace') && !isLovelaceProcessed) void updateLovelace()
   else if (allowedPages.includes(path)) void updatePage(path);
 }
