@@ -82,6 +82,10 @@
   }
   function waitForElement(variantsFn, timeoutMs = 3e3) {
     return new Promise((resolve) => {
+      console.log("-------------------");
+      console.log("Variants:");
+      console.log(variantsFn().filter(Boolean));
+      console.log("-------------------");
       const immediate = variantsFn().filter(Boolean)[0];
       if (immediate) return resolve(immediate);
       let done = false;
@@ -332,16 +336,18 @@
   // src/pages/common.handler.ts
   async function updatePage(path) {
     try {
+      console.log("Starting...");
       const hasBurger = showMenuBtn[path];
       console.log(`Page hasBurger: ${hasBurger}`);
       const haTargetEl = hasBurger ? await waitForElement(getBurgerVariants) : null;
+      console.log("Target burger element:", haTargetEl);
       document.body.insertAdjacentHTML("beforeend", mhWidget(hasBurger));
+      console.log("Widget inserted.");
       if (hasBurger) {
         console.log("Add Burger event...");
         const proxyBurger = document.body.querySelector("#mhBurger");
         proxyBurger?.addEventListener("click", () => {
           console.log("Proxy burger clicked!");
-          console.log(`Target element: ${haTargetEl}`);
           haTargetEl?.click();
         });
       }
@@ -363,7 +369,8 @@
     navigation.addEventListener("navigate", (data) => {
       if (!data) return;
       const path2 = formatPath(new URL(data?.destination?.url)?.pathname);
-      console.log(`Event emitted. Last path: ${lastPath}. Path: ${path2}. Is new page: ${path2 === lastPath}`);
+      console.log(`Event emitted. Last path: ${lastPath}. Path: ${path2}. Is new page: ${path2 !== lastPath}`);
+      console.log(`Can continue: ${path2 !== lastPath}`);
       if (path2 === lastPath) return;
       lastPath = path2;
       void runForCurrentPath(path2);
