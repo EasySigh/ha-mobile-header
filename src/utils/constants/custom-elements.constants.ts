@@ -1,9 +1,8 @@
 const mhWidgetStyles = `
   position: fixed;
   z-index: 2;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(var(--header-height) + env(safe-area-inset-bottom));
+  right: 2rem;
+  bottom: calc(var(--header-height) + env(safe-area-inset-bottom) + 1rem);
   border-radius: 24px;
   display: flex;
   backdrop-filter: blur(1px);

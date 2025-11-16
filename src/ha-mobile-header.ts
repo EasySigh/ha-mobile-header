@@ -1,17 +1,21 @@
-import {getUrlPath, isLovelaceProcessed} from "./utils/helpers";
+import {formatPath, getUrlPath, isLovelaceProcessed} from "./utils/helpers";
 import {updateLovelace} from "./pages/lovelace.handler";
 import {updatePage} from "./pages/common.handler";
 import {allowedPages} from "./utils/constants/paths.constants";
+
+let lastPath = '';
 
 export const hambStart = () => {
   const path = getUrlPath();
   void runForCurrentPath(path);
 
   // @ts-ignore
-  window.addEventListener("popstate", () => {
-    console.log(123);
-    // const path = formatPath(new URL(data?.destination?.url)?.pathname);
-    const path = getUrlPath();
+  navigation.addEventListener("navigate", (data) => {
+    if (!data) return;
+
+    const path = formatPath(new URL(data?.destination?.url)?.pathname);
+    if (path === lastPath) return;
+    lastPath = path;
     void runForCurrentPath(path);
   });
 }
