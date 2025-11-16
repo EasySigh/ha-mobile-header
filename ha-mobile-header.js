@@ -333,11 +333,17 @@
   async function updatePage(path) {
     try {
       const hasBurger = showMenuBtn[path];
+      console.log(`Page hasBurger: ${hasBurger}`);
       const haTargetEl = hasBurger ? await waitForElement(getBurgerVariants) : null;
       document.body.insertAdjacentHTML("beforeend", mhWidget(hasBurger));
       if (hasBurger) {
+        console.log("Add Burger event...");
         const proxyBurger = document.body.querySelector("#mhBurger");
-        proxyBurger?.addEventListener("click", () => haTargetEl?.click());
+        proxyBurger?.addEventListener("click", () => {
+          console.log("Proxy burger clicked!");
+          console.log(`Target element: ${haTargetEl}`);
+          haTargetEl?.click();
+        });
       }
       const mhQuickLink = document.body.querySelector("#mhQuickLink");
       mhQuickLink?.addEventListener("click", () => {
@@ -357,6 +363,7 @@
     navigation.addEventListener("navigate", (data) => {
       if (!data) return;
       const path2 = formatPath(new URL(data?.destination?.url)?.pathname);
+      console.log(`Event emitted. Last path: ${lastPath}. Path: ${path2}. Is new page: ${path2 === lastPath}`);
       if (path2 === lastPath) return;
       lastPath = path2;
       void runForCurrentPath(path2);

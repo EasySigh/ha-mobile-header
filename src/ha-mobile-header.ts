@@ -14,6 +14,8 @@ export const hambStart = () => {
     if (!data) return;
 
     const path = formatPath(new URL(data?.destination?.url)?.pathname);
+
+    console.log(`Event emitted. Last path: ${lastPath}. Path: ${path}. Is new page: ${path === lastPath}`);
     if (path === lastPath) return;
     lastPath = path;
     void runForCurrentPath(path);
